@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="h-full flex flex-col">
       <Header toggleSidebar={toggleSidebar} />
-      <div className="flex-1 flex h-full overflow-clip">
+      <div className="flex-1 flex h-full overflow-clip overflow-y-hidden">
         <Sidebar open={openSidebar} />
         <Body />
       </div>

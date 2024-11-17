@@ -84,7 +84,10 @@ function Body() {
     }[]
   >([]);
   const [count, setCount] = useState(0);
-
+  const [visibleUserMessage, setVisibleUserMessage] = useState<string | null>(
+    null
+  );
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -95,6 +98,45 @@ function Body() {
         behavior: "smooth",
       });
     }
+  }, [chatData]);
+
+  useEffect(() => {
+    console.log(visibleUserMessage);
+  }, [visibleUserMessage]);
+
+  useEffect(() => {
+    // 스크롤 위치에 따른 메시지 추적
+    const handleScroll = () => {
+      console.log(1);
+      let foundUserMessage = null;
+      chatData.forEach((data) => {
+        const messageElement = messageRefs.current.get(data.id);
+        if (messageElement) {
+          const rect = messageElement.getBoundingClientRect();
+          // 메시지가 화면에 보이면 해당 메시지를 추적
+          if (rect.top >= 0 && rect.top <= window.innerHeight) {
+            if (data.role === "user") {
+              foundUserMessage = data.id;
+            }
+          }
+        }
+      });
+      // 보이는 user 메시지를 상태에 업데이트
+      if (foundUserMessage) {
+        console.log(foundUserMessage);
+        setVisibleUserMessage(foundUserMessage);
+      }
+    };
+
+    // 스크롤 이벤트 리스너 추가
+    if (chatContainerRef.current) {
+      chatContainerRef.current.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, [chatData]);
 
   const handleSendClick = () => {
@@ -127,7 +169,7 @@ function Body() {
         className="flex-1 overflow-y-auto w-full flex flex-col"
       >
         <BlankChat />
-        <Chat chatData={chatData} />
+        <Chat chatData={chatData} messageRefs={messageRefs} />
       </div>
 
       <div className="relative chat-bar flex justify-between gap-2 items-center max-w-4xl w-full pb-8">

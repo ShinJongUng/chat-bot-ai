@@ -5,8 +5,10 @@ import remarkGfm from "remark-gfm";
 
 function Chat({
   chatData,
+  messageRefs,
 }: {
   chatData: { role: string; content: string; id: string }[];
+  messageRefs: React.RefObject<Map<string, HTMLDivElement>>;
 }) {
   return (
     <div className="w-full py-8 gap-16 px-8 flex justify-center items-center">
@@ -16,6 +18,11 @@ function Chat({
             <div
               key={index}
               id={data.id}
+              ref={(el) => {
+                if (el) {
+                  messageRefs.current!.set(data.id, el);
+                }
+              }}
               className="user-message flex ml-6 items-center gap-4 font-extrabold text-xl mt-16"
             >
               <Avatar />
